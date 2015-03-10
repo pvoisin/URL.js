@@ -1,0 +1,20 @@
+{
+  "name": "URL",
+  "version": "0.1.0",
+  "description": "Simple URL helper.",
+  "main": "distribution/browser/URL.js",
+  "authors": [
+    "Pierre Voisin <pierre.voisin@gmail.com>"
+  ],
+  "repository": "https://github.com/pvoisin/URL.js.git",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test"
+  ],
+  "devDependencies": {
+    "expect": "~0.3.1",
+    "mocha": "~2.2.1"
+  }
+}
