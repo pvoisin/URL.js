@@ -31,5 +31,3 @@ function isObject(value) {
 function isArray(value) {
 	return Array.isArray(value);
 }
-
-module.exports = merge;

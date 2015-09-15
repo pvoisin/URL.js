@@ -14,22 +14,39 @@ module.exports = function(grunt) {
 			}
 		},
 
-		mochaTest: {
+		connect: {
+			options: {
+				hostname: "*",
+				base: ".",
+				keepalive: true,
+				port: 8080
+			},
+
+			development: {},
+
 			test: {
 				options: {
-					reporter: "spec"
-				},
+					keepalive: false,
+					port: 8888
+				}
+			}
+		},
 
-				src: ["test/suites/**/*Suite.js"]
+		mocha: {
+			test: {
+				options: {
+					urls: ["http://localhost:8888/test/framework/runner.html"]
+				}
 			}
 		}
 	});
 
-	grunt.registerTask("test", ["mochaTest"]);
+	grunt.registerTask("server", ["connect:development"]);
+	grunt.registerTask("test", ["connect:test", "mocha"]);
 
 	var modules = [
-		"grunt-browserify",
-		"grunt-mocha-test"
+		"grunt-contrib-connect",
+		"grunt-mocha"
 	];
 
 	modules.forEach(function(module) {

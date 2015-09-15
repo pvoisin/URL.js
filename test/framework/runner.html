@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+		<title>Mocha</title>
+
+		<link rel="shortcut icon" href="assets/favicon.ico"/>
+		<link rel="stylesheet" type="text/css" href="assets/styles/mocha.css"/>
+
+		<script src="assets/scripts/mocha.js"></script>
+	</head>
+	<body>
+		<div id="mocha"></div>
+
+		<script src="../../source/merge.js"></script>
+		<script>
+			if(/(\?|&)production\b/.test(window.location.search)) {
+				document.write("<scr" + "ipt src=\"../../distribution/browser/URL.js\"></scr" + "ipt>");
+			}
+			else if(/(\?|&)release\b/.test(window.location.search)) {
+				document.write("<scr" + "ipt src=\"../../bower_components/unified-resource-locator/distribution/browser/URL.js\"></scr" + "ipt>");
+			}
+			else {
+				document.write("<ul>"
+					+ 	"<li><a href=\"?production\">?production</a></li>"
+					+ 	"<li><a href=\"?release\">?release</a></li>"
+					+ "</ul>");
+			}
+		</script>
+
+		<script src="assets/scripts/expect.js"></script>
+		<script src="assets/scripts/sinon.js"></script>
+
+		<script>
+			var global = this;
+
+			mocha.setup("bdd");
+
+			var resolver = {};
+
+			function require(modules, callback) {
+				return callback.apply(this, modules.map(function(module) {
+					return resolver[module] || global[module];
+				}));
+			}
+		</script>
+
+		<script src="../suites/URLSuite.js"></script>
+		<script src="../suites/UtilitySuite.js"></script>
+
+		<script>
+			if(/(\?|&)check-globals\b/.test(window.location.search)) {
+				mocha.checkLeaks();
+			}
+
+			mocha.run();
+		</script>
+	</body>
+</html>
