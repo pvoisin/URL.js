@@ -1,6 +1,6 @@
 {
   "name": "unified-resource-locator",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Simple URL implementation.",
   "main": "source/URL.js",
   "author": "Pierre Voisin <pierre.voisin@gmail.com>",

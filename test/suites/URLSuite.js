@@ -9,7 +9,8 @@ describe("URL", function() {
 			"//p/a/t/h?q=u&e&r=y#fragment",
 			"https://host/p/a/t/h/?q=Earth",
 			"http://fr.wikipedia.org/wiki/Sp%C3%A9cial:Page_au_hasard",
-			"//en.wikipedia.org/wiki/URI_scheme#Generic_syntax"
+			"//en.wikipedia.org/wiki/URI_scheme#Generic_syntax",
+			"redis://undefined:password@localhost:6379/0"
 		],
 		invalid: [
 			"",
