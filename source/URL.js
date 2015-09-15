@@ -1,7 +1,8 @@
-var merge = require("./utility").merge;
+var merge = require("./merge");
+
 
 function URL(locator, options, override) {
-	var self = this;
+	var self = this, own = self;
 
 	locator = String(locator || "").trim();
 
@@ -12,7 +13,7 @@ function URL(locator, options, override) {
 	options = merge({/* default */}, options);
 
 	URL.parts.forEach(function(part) {
-		self[part] = undefined;
+		own[part] = undefined;
 	});
 
 	self.query = {};
@@ -28,62 +29,64 @@ function URL(locator, options, override) {
 	URL.parts.forEach(function(part, index) {
 		var value = override && (part in options) ? options[part] : capture[index] || options[part];
 		if(value !== undefined) {
-			self[part] = (part === "port") ? Number(value) : value;
+			own[part] = (part === "port") ? Number(value) : value;
 		}
 	});
 
-	if(typeof self.query === "string") {
-		self.query = URL.parseQueryString(self.query);
+	if(typeof own.query === "string") {
+		own.query = URL.parseQueryString(own.query);
 	}
 
 	if("query" in options) {
 		var query = (typeof options.query === "string") ? URL.parseQueryString(options.query) : options.query;
-		self.query = override ? options.query : merge({}, self.query, query);
+		own.query = override ? options.query : merge({}, own.query, query);
 	}
 }
 
 URL.prototype.toString = function() {
-	var self = this;
+	var self = this, own = self;
 
 	var result = "";
 
-	if(self.host) {
-		result += (self.protocol || "http") + "://" + self.host;
-		if(self.port && self.port !== 80) {
-			result += ":" + self.port;
+	if(own.host) {
+		own.protocol && (result += own.protocol + ":");
+		result += "//" + own.host;
+		if(own.port && own.port !== 80) {
+			result += ":" + own.port;
 		}
 	}
 
-	result += self.path || (self.query || self.fragment) && "/" || "";
+	result += own.path || (own.query || own.fragment) && "/" || "";
 
-	if(self.query) {
-		var queryString = URL.makeQueryString(self.query);
+	if(own.query) {
+		var queryString = URL.makeQueryString(own.query);
 		if(queryString) {
 			result += "?" + queryString;
 		}
 	}
 
-	if(self.fragment) {
-		result += "#" + self.fragment;
+	if(own.fragment) {
+		result += "#" + own.fragment;
 	}
 
 	return result;
 };
 
-// Based on RFC 3986 (http://en.wikipedia.org/wiki/URI_scheme#Generic_syntax).
+// Cf. [RFC 3986](http://en.wikipedia.org/wiki/URI_scheme#Generic_syntax)
 URL.pattern = /^(?:(?:(\w+):)?\/\/([.\-\w]+)(?::(\d+))?)?(?:(\/[^\?#]*)(?:\?([^#]+))?(?:#(.+))?)?$/;
 
 URL.parts = ["protocol", "host", "port", "path", "query", "fragment"];
 
 URL.parseQueryString = function(queryString) {
-	var query = {}, capture, pattern = /([^&=]+)=?([^&]*)/g;
+	var query = {}, capture;
+	var pattern = /([^&=]+)=?([^&]*)/g;
 
-	// Here we need to use the same pattern instance for every iterations, otherwise it will be infinite.
+	// Here we need to use the same pattern instance for every iterations, otherwise it won't stop...
 	while(queryString && (capture = pattern.exec(queryString))) { // assignment
 		query[decode(capture[1])] = decode(capture[2]);
 	}
 
-	// Decode URI components and replaces "+" occurrences with spaces.
+	// Decode URI components and replace "+" occurrences with spaces.
 	function decode(string) {
 		return decodeURIComponent(string.replace(/\+/g, " "));
 	}

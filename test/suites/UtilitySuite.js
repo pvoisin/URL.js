@@ -1,4 +1,4 @@
-var merge = require("../../source/utility").merge;
+var merge = require("../../source/merge");
 var expect = require("expect.js");
 
 describe("merge", function() {

@@ -12,11 +12,24 @@ module.exports = function(grunt) {
 					}
 				}
 			}
+		},
+
+		mochaTest: {
+			test: {
+				options: {
+					reporter: "spec"
+				},
+
+				src: ["test/suites/**/*Suite.js"]
+			}
 		}
 	});
 
+	grunt.registerTask("test", ["mochaTest"]);
+
 	var modules = [
-		"grunt-browserify"
+		"grunt-browserify",
+		"grunt-mocha-test"
 	];
 
 	modules.forEach(function(module) {

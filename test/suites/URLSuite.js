@@ -12,6 +12,7 @@ describe("URL", function() {
 			"//en.wikipedia.org/wiki/URI_scheme#Generic_syntax"
 		],
 		invalid: [
+			"",
 			"://host:80/p/a/t/h?q=u&e&r=y#fragment",
 			"http://:port/p/a/t/h?q=u&e&r=y#fragment"
 		]
@@ -40,7 +41,7 @@ describe("URL", function() {
 		var locator = "/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1";
 
 		expect(String(new URL(locator, {protocol: "http"}))).to.be("/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
-		expect(String(new URL(locator, {host: "candy.com"}))).to.be("http://candy.com/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
+		expect(String(new URL(locator, {host: "candy.com"}))).to.be("//candy.com/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
 		expect(String(new URL(locator, {
 			protocol: "https",
 			host: "candy.com"
@@ -51,7 +52,7 @@ describe("URL", function() {
 	it("could be overridden by options", function() {
 		var locator = "file://localhost:1234/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1";
 
-		expect(String(new URL(locator, {protocol: null}, true))).to.be("http://localhost:1234/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
+		expect(String(new URL(locator, {protocol: null}, true))).to.be("//localhost:1234/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
 		expect(String(new URL(locator, {host: null}, true))).to.be("/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
 		expect(String(new URL(locator, {port: null}, true))).to.be("file://localhost/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
 		expect(String(new URL(locator, {path: null}, true))).to.eql("file://localhost:1234/?X=1&Y&Z=3&odd=bizarre#items?page=1");

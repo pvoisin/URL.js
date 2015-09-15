@@ -1,0 +1,7 @@
+verbose: false
+instrumentation:
+    root: source
+    extensions:
+        - .js
+reporting:
+    dir: .coverage
