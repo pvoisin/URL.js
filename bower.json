@@ -1,7 +1,7 @@
 {
-  "name": "URL",
-  "version": "0.1.0",
-  "description": "Simple URL helper.",
+  "name": "unified-resource-locator",
+  "version": "0.2.0",
+  "description": "Simple URL implementation.",
   "main": "distribution/browser/URL.js",
   "authors": [
     "Pierre Voisin <pierre.voisin@gmail.com>"
@@ -14,7 +14,7 @@
     "test"
   ],
   "devDependencies": {
-    "expect": "~0.3.1",
-    "mocha": "~2.2.1"
+    "expect": "^0.3.1",
+    "mocha": "^2.3.2"
   }
 }

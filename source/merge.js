@@ -1,5 +1,5 @@
 function merge(object/*, source, ...*/) {
-	[].slice.call(arguments, 1).forEach(function(source) {
+	Array.prototype.slice.call(arguments, 1).forEach(function(source) {
 		if(isArray(object) && isArray(source)) {
 			source.forEach(function(value) {
 				if(!~object.indexOf(value)) {
@@ -32,6 +32,4 @@ function isArray(value) {
 	return Array.isArray(value);
 }
 
-module.exports = {
-	merge: merge
-};
+module.exports = merge;
