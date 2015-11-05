@@ -11,24 +11,42 @@ describe("URL", function() {
 			"http://fr.wikipedia.org/wiki/Sp%C3%A9cial:Page_au_hasard",
 			"//en.wikipedia.org/wiki/URI_scheme#Generic_syntax",
 			"redis://undefined:password@localhost:6379/0",
+			"http://mickey@disney.com/#/house",
 			{protocol: "http", "host": "server"},
 			{host: "server"},
 			{path: "/from/root"},
 			{query: "A=1"}
 		],
-		proofs: [
-			{protocol: "http", host: "foo.bar-baz.com", port: 80, path: "/p/a/t/h", query: {q: "u", e: undefined, r: "y"}, fragment: "fragment"},
-			{protocol: "http", host: "host", port: 80, path: "/p/a/t/h", query: {q: "u", e: undefined, r: "y"}, fragment: "fragment"},
-			{path: "/p/a/t/h", query: {q: "u", e: undefined, r: "y"}, fragment: "fragment"},
-			{protocol: "https", host: "host", path: "/p/a/t/h/", query: {q: "Earth"}},
-			{protocol: "http", host: "fr.wikipedia.org", path: "/wiki/Sp%C3%A9cial:Page_au_hasard"},
-			{host: "en.wikipedia.org", path: "/wiki/URI_scheme", fragment: "Generic_syntax"},
-			{protocol: "redis", user: "undefined", password: "password", host: "localhost", port: 6379, path: "/0"},
-			{protocol: "http", host: "server", path: "/"},
-			{host: "server", path: "/"},
-			{path: "/from/root"},
-			{path: "/", query: {A: 1}}
-		],
+		proofs: {
+			parts: [
+				{protocol: "http", host: "foo.bar-baz.com", port: 80, path: "/p/a/t/h", query: {q: "u", e: undefined, r: "y"}, fragment: "fragment"},
+				{protocol: "http", host: "host", port: 80, path: "/p/a/t/h", query: {q: "u", e: undefined, r: "y"}, fragment: "fragment"},
+				{path: "/p/a/t/h", query: {q: "u", e: undefined, r: "y"}, fragment: "fragment"},
+				{protocol: "https", host: "host", path: "/p/a/t/h/", query: {q: "Earth"}},
+				{protocol: "http", host: "fr.wikipedia.org", path: "/wiki/Sp%C3%A9cial:Page_au_hasard"},
+				{host: "en.wikipedia.org", path: "/wiki/URI_scheme", fragment: "Generic_syntax"},
+				{protocol: "redis", user: "undefined", password: "password", host: "localhost", port: 6379, path: "/0"},
+				{protocol: "http", user: "mickey", host: "disney.com", path: "/", fragment: "/house"},
+				{protocol: "http", host: "server", path: "/"},
+				{host: "server", path: "/"},
+				{path: "/from/root"},
+				{path: "/", query: {A: 1}}
+			],
+			representations: [
+				"http://foo.bar-baz.com/p/a/t/h?q=u&e&r=y#fragment",
+				"http://host/p/a/t/h?q=u&e&r=y#fragment",
+				"/p/a/t/h?q=u&e&r=y#fragment",
+				"https://host/p/a/t/h/?q=Earth",
+				"http://fr.wikipedia.org/wiki/Sp%C3%A9cial:Page_au_hasard",
+				"//en.wikipedia.org/wiki/URI_scheme#Generic_syntax",
+				"redis://undefined:password@localhost:6379/0",
+				"http://mickey@disney.com/#/house",
+				"http://server/",
+				"//server/",
+				"/from/root",
+				"/?A=1"
+			]
+		},
 		invalid: [
 			"",
 			"123",
@@ -36,7 +54,11 @@ describe("URL", function() {
 			"abc.xyz",
 			"://host:80/p/a/t/h?q=u&e&r=y#fragment",
 			"http://:port/p/a/t/h?q=u&e&r=y#fragment",
-			{protocol: "http"}
+			{protocol: "http"},
+			{user: "whoever"},
+			{password: "***"},
+			{user: "whoever", password: "***"},
+			{port: 8888}
 		]
 	};
 
@@ -46,7 +68,8 @@ describe("URL", function() {
 			expect(function() {
 				locator = new URL(candidate);
 			}).not.to.throwError(function(error) { console.error(error.stack); });
-			expect(locator).to.eql(candidates.proofs[index]);
+			expect(locator).to.eql(candidates.proofs.parts[index]);
+			expect(String(locator)).to.eql(candidates.proofs.representations[index]);
 		});
 
 		candidates["invalid"].forEach(function(candidate) {
@@ -71,6 +94,7 @@ describe("URL", function() {
 			host: "candy.com"
 		}))).to.be("https://candy.com/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
 		expect(String(new URL(locator, {query: {user: "Mickey"}}))).to.eql("/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre&user=Mickey#items?page=1");
+		expect(String(new URL(locator, {query: "user=Mickey"}))).to.eql("/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre&user=Mickey#items?page=1");
 	});
 
 	it("could be overridden by options", function() {
