@@ -2,7 +2,7 @@
 var helper = require("./helper");
 
 
-function URL(locator, options, override) {
+function URL(locator, options, overwrite) {
 	var self = this, own = self;
 
 	if(typeof locator === "string") {
@@ -23,7 +23,7 @@ function URL(locator, options, override) {
 		capture = capture.slice(1);
 
 		URL.parts.forEach(function(part, index) {
-			var value = override && (part in options) ? options[part] : capture[index] || options[part];
+			var value = overwrite && (part in options) ? options[part] : capture[index] || options[part];
 			if(value !== undefined) {
 				own[part] = value;
 			}
@@ -34,7 +34,7 @@ function URL(locator, options, override) {
 		}
 
 		// If not overriding, let's complete the query parameters:
-		if(!override && own.query !== options.query) {
+		if(!overwrite && own.query !== options.query) {
 			if(typeof options.query === "string") {
 				options.query = URL.parseQueryString(options.query);
 			}
@@ -44,9 +44,10 @@ function URL(locator, options, override) {
 	else {
 		options = locator;
 
-		options.path = options.path || "/";
-
-		if(options.protocol && !options.host) {
+		if(options.protocol && !options.host
+			|| options.port && !options.host
+			|| options.user && !options.host
+			|| options.password && !options.user) {
 			throw new Error("Missing URL parts: " + JSON.stringify(options));
 		}
 
@@ -61,6 +62,8 @@ function URL(locator, options, override) {
 		}
 	}
 
+	own.path = own.path || "/";
+
 	if(own.port !== undefined && typeof own.port !== "number") {
 		own.port = Number(own.port);
 	}
@@ -73,19 +76,24 @@ URL.prototype.toString = function() {
 
 	if(own.host) {
 		own.protocol && (result += own.protocol + ":");
-		result += "//" + own.host;
+		result += "//";
+		if(own.user) {
+			result += own.user;
+			if(own.password) {
+				result += ":" + own.password;
+			}
+			result += "@"
+		}
+		result += own.host;
 		if(own.port && own.port !== 80) {
 			result += ":" + own.port;
 		}
 	}
 
-	result += own.path || (own.query || own.fragment) && "/" || "";
+	result += own.path;
 
 	if(own.query) {
-		var queryString = URL.makeQueryString(own.query);
-		if(queryString) {
-			result += "?" + queryString;
-		}
+		result += "?" + URL.makeQueryString(own.query);
 	}
 
 	if(own.fragment) {
@@ -96,7 +104,7 @@ URL.prototype.toString = function() {
 };
 
 // Cf. [RFC 3986](http://en.wikipedia.org/wiki/URI_scheme#Generic_syntax)
-URL.pattern = /^(?:(?:(\w+):)?\/\/(?:(\w+):(\w+)@)?([.\-\w]+)(?::(\d+))?)?(?:(\/[^\?#]*)(?:\?([^#]+))?(?:#(.+))?)?$/;
+URL.pattern = /^(?:(?:(\w+):)?\/\/(?:(\w+)(?::(\w+))?@)?([.\-\w]+)(?::(\d+))?)?(?:(\/[^\?#]*)(?:\?([^#]+))?(?:#(.+))?)?$/;
 
 URL.parts = ["protocol", "user", "password", "host", "port", "path", "query", "fragment"];
 
@@ -120,10 +128,8 @@ URL.parseQueryString = function(queryString) {
 URL.makeQueryString = function(query) {
 	var pairs = [];
 	for(var parameter in query) {
-		if(query.hasOwnProperty(parameter)) {
-			var value = query[parameter];
-			pairs.push(encodeURIComponent(parameter) + (value ? "=" + encodeURIComponent(value) : ""));
-		}
+		var value = query[parameter];
+		pairs.push(encodeURIComponent(parameter) + (value ? "=" + encodeURIComponent(value) : ""));
 	}
 
 	return pairs.join("&");
