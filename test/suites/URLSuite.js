@@ -6,29 +6,52 @@ describe("URL", function() {
 		valid: [
 			"http://foo.bar-baz.com:80/p/a/t/h?q=u&e&r=y#fragment",
 			"http://host:80/p/a/t/h?q=u&e&r=y#fragment",
-			"//p/a/t/h?q=u&e&r=y#fragment",
+			"/p/a/t/h?q=u&e&r=y#fragment",
 			"https://host/p/a/t/h/?q=Earth",
 			"http://fr.wikipedia.org/wiki/Sp%C3%A9cial:Page_au_hasard",
 			"//en.wikipedia.org/wiki/URI_scheme#Generic_syntax",
-			"redis://undefined:password@localhost:6379/0"
+			"redis://undefined:password@localhost:6379/0",
+			{protocol: "http", "host": "server"},
+			{host: "server"},
+			{path: "/from/root"},
+			{query: "A=1"}
+		],
+		proofs: [
+			{protocol: "http", host: "foo.bar-baz.com", port: 80, path: "/p/a/t/h", query: {q: "u", e: undefined, r: "y"}, fragment: "fragment"},
+			{protocol: "http", host: "host", port: 80, path: "/p/a/t/h", query: {q: "u", e: undefined, r: "y"}, fragment: "fragment"},
+			{path: "/p/a/t/h", query: {q: "u", e: undefined, r: "y"}, fragment: "fragment"},
+			{protocol: "https", host: "host", path: "/p/a/t/h/", query: {q: "Earth"}},
+			{protocol: "http", host: "fr.wikipedia.org", path: "/wiki/Sp%C3%A9cial:Page_au_hasard"},
+			{host: "en.wikipedia.org", path: "/wiki/URI_scheme", fragment: "Generic_syntax"},
+			{protocol: "redis", user: "undefined", password: "password", host: "localhost", port: 6379, path: "/0"},
+			{protocol: "http", host: "server", path: "/"},
+			{host: "server", path: "/"},
+			{path: "/from/root"},
+			{path: "/", query: {A: 1}}
 		],
 		invalid: [
 			"",
+			"123",
+			"?&#",
+			"abc.xyz",
 			"://host:80/p/a/t/h?q=u&e&r=y#fragment",
-			"http://:port/p/a/t/h?q=u&e&r=y#fragment"
+			"http://:port/p/a/t/h?q=u&e&r=y#fragment",
+			{protocol: "http"}
 		]
 	};
 
 	it("should respect basic generic syntax of RFC 3986", function() {
-		candidates["valid"].forEach(function(candidate) {
+		candidates["valid"].forEach(function(candidate, index) {
+			var locator = undefined;
 			expect(function() {
-				new URL(candidate);
+				locator = new URL(candidate);
 			}).not.to.throwError(function(error) { console.error(error.stack); });
+			expect(locator).to.eql(candidates.proofs[index]);
 		});
 
 		candidates["invalid"].forEach(function(candidate) {
 			expect(function() {
-				new URL(candidate);
+				console.log(String(new URL(candidate)));
 			}).to.throwError();
 		});
 	});
@@ -68,11 +91,11 @@ describe("URL", function() {
 	});
 
 	it("should allow query manipulation", function() {
-		expect(new URL("/thing").query).to.eql({});
+		expect(new URL("/thing").query).to.be(undefined);
 
 		var locator = new URL("file://localhost:1234/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
 
-		expect(locator.query).to.eql({X: "1", Y: "", Z: "3", odd: "bizarre"});
+		expect(locator.query).to.eql({X: "1", Y: undefined, Z: "3", odd: "bizarre"});
 
 		var query = locator.query;
 

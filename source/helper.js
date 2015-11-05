@@ -1,6 +1,6 @@
 function merge(object/*, source, ...*/) {
 	Array.prototype.slice.call(arguments, 1).forEach(function(source) {
-		if(isArray(object) && isArray(source)) {
+		if(Array.isArray(object) && Array.isArray(source)) {
 			source.forEach(function(value) {
 				if(!~object.indexOf(value)) {
 					object.push(value);
@@ -28,8 +28,7 @@ function isObject(value) {
 	return value && typeof value === "object";
 }
 
-function isArray(value) {
-	return Array.isArray(value);
-}
-
-module.exports = merge;
+module.exports = {
+	merge: merge,
+	isObject: isObject
+};

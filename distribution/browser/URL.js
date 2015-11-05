@@ -1,46 +1,68 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.URL = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var merge = require("./merge");
+var helper = require("./helper");
 
 
 function URL(locator, options, override) {
 	var self = this, own = self;
 
-	locator = String(locator || "").trim();
+	if(typeof locator === "string") {
+		locator = String(locator || "").trim();
 
-	if(!locator) {
-		throw new Error("Invalid locator:", locator);
-	}
-
-	options = merge({/* default */}, options);
-
-	URL.parts.forEach(function(part) {
-		own[part] = undefined;
-	});
-
-	self.query = {};
-
-	var capture = URL.pattern.exec(locator);
-
-	if(!capture) {
-		throw new Error("Invalid URL: " + locator);
-	}
-
-	capture = capture.slice(1);
-
-	URL.parts.forEach(function(part, index) {
-		var value = override && (part in options) ? options[part] : capture[index] || options[part];
-		if(value !== undefined) {
-			own[part] = (part === "port") ? Number(value) : value;
+		if(!locator) {
+			throw new Error("Invalid locator:", locator);
 		}
-	});
 
-	if(typeof own.query === "string") {
-		own.query = URL.parseQueryString(own.query);
+		options = helper.merge({/* ∅ */}, options);
+
+		var capture = URL.pattern.exec(locator);
+
+		if(!capture) {
+			throw new Error("Invalid URL: " + locator);
+		}
+
+		capture = capture.slice(1);
+
+		URL.parts.forEach(function(part, index) {
+			var value = override && (part in options) ? options[part] : capture[index] || options[part];
+			if(value !== undefined) {
+				own[part] = value;
+			}
+		});
+
+		if(typeof own.query === "string") {
+			own.query = URL.parseQueryString(own.query);
+		}
+
+		// If not overriding, let's complete the query parameters:
+		if(!override && own.query !== options.query) {
+			if(typeof options.query === "string") {
+				options.query = URL.parseQueryString(options.query);
+			}
+			own.query = helper.merge({}, own.query, options.query);
+		}
+	}
+	else {
+		options = locator;
+
+		options.path = options.path || "/";
+
+		if(options.protocol && !options.host) {
+			throw new Error("Missing URL parts: " + JSON.stringify(options));
+		}
+
+		URL.parts.forEach(function(part, index) {
+			if(part in options) {
+				own[part] = options[part] && String(options[part]);
+			}
+		});
+
+		if(typeof own.query === "string") {
+			own.query = URL.parseQueryString(own.query);
+		}
 	}
 
-	if("query" in options) {
-		var query = (typeof options.query === "string") ? URL.parseQueryString(options.query) : options.query;
-		own.query = override ? options.query : merge({}, own.query, query);
+	if(own.port !== undefined && typeof own.port !== "number") {
+		own.port = Number(own.port);
 	}
 }
 
@@ -84,7 +106,7 @@ URL.parseQueryString = function(queryString) {
 
 	// Here we need to use the same pattern instance for every iterations, otherwise it won't stop...
 	while(queryString && (capture = pattern.exec(queryString))) { // assignment
-		query[decode(capture[1])] = decode(capture[2]);
+		query[decode(capture[1])] = decode(capture[2]) || undefined;
 	}
 
 	// Decode URI components and replace "+" occurrences with spaces.
@@ -109,10 +131,10 @@ URL.makeQueryString = function(query) {
 
 
 module.exports = URL;
-},{"./merge":2}],2:[function(require,module,exports){
+},{"./helper":2}],2:[function(require,module,exports){
 function merge(object/*, source, ...*/) {
 	Array.prototype.slice.call(arguments, 1).forEach(function(source) {
-		if(isArray(object) && isArray(source)) {
+		if(Array.isArray(object) && Array.isArray(source)) {
 			source.forEach(function(value) {
 				if(!~object.indexOf(value)) {
 					object.push(value);
@@ -140,10 +162,9 @@ function isObject(value) {
 	return value && typeof value === "object";
 }
 
-function isArray(value) {
-	return Array.isArray(value);
-}
-
-module.exports = merge;
+module.exports = {
+	merge: merge,
+	isObject: isObject
+};
 },{}]},{},[1])(1)
 });

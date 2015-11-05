@@ -1,45 +1,67 @@
-var merge = require("./merge");
+var helper = require("./helper");
 
 
 function URL(locator, options, override) {
 	var self = this, own = self;
 
-	locator = String(locator || "").trim();
+	if(typeof locator === "string") {
+		locator = String(locator || "").trim();
 
-	if(!locator) {
-		throw new Error("Invalid locator:", locator);
-	}
-
-	options = merge({/* default */}, options);
-
-	URL.parts.forEach(function(part) {
-		own[part] = undefined;
-	});
-
-	self.query = {};
-
-	var capture = URL.pattern.exec(locator);
-
-	if(!capture) {
-		throw new Error("Invalid URL: " + locator);
-	}
-
-	capture = capture.slice(1);
-
-	URL.parts.forEach(function(part, index) {
-		var value = override && (part in options) ? options[part] : capture[index] || options[part];
-		if(value !== undefined) {
-			own[part] = (part === "port") ? Number(value) : value;
+		if(!locator) {
+			throw new Error("Invalid locator:", locator);
 		}
-	});
 
-	if(typeof own.query === "string") {
-		own.query = URL.parseQueryString(own.query);
+		options = helper.merge({/* ∅ */}, options);
+
+		var capture = URL.pattern.exec(locator);
+
+		if(!capture) {
+			throw new Error("Invalid URL: " + locator);
+		}
+
+		capture = capture.slice(1);
+
+		URL.parts.forEach(function(part, index) {
+			var value = override && (part in options) ? options[part] : capture[index] || options[part];
+			if(value !== undefined) {
+				own[part] = value;
+			}
+		});
+
+		if(typeof own.query === "string") {
+			own.query = URL.parseQueryString(own.query);
+		}
+
+		// If not overriding, let's complete the query parameters:
+		if(!override && own.query !== options.query) {
+			if(typeof options.query === "string") {
+				options.query = URL.parseQueryString(options.query);
+			}
+			own.query = helper.merge({}, own.query, options.query);
+		}
+	}
+	else {
+		options = locator;
+
+		options.path = options.path || "/";
+
+		if(options.protocol && !options.host) {
+			throw new Error("Missing URL parts: " + JSON.stringify(options));
+		}
+
+		URL.parts.forEach(function(part, index) {
+			if(part in options) {
+				own[part] = options[part] && String(options[part]);
+			}
+		});
+
+		if(typeof own.query === "string") {
+			own.query = URL.parseQueryString(own.query);
+		}
 	}
 
-	if("query" in options) {
-		var query = (typeof options.query === "string") ? URL.parseQueryString(options.query) : options.query;
-		own.query = override ? options.query : merge({}, own.query, query);
+	if(own.port !== undefined && typeof own.port !== "number") {
+		own.port = Number(own.port);
 	}
 }
 
@@ -83,7 +105,7 @@ URL.parseQueryString = function(queryString) {
 
 	// Here we need to use the same pattern instance for every iterations, otherwise it won't stop...
 	while(queryString && (capture = pattern.exec(queryString))) { // assignment
-		query[decode(capture[1])] = decode(capture[2]);
+		query[decode(capture[1])] = decode(capture[2]) || undefined;
 	}
 
 	// Decode URI components and replace "+" occurrences with spaces.

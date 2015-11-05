@@ -12,5 +12,5 @@ Well, for now... please have a look at the [test suite](test/suites/URLSuite.js#
 [npm-url]: https://www.npmjs.com/package/unified-resource-locator
 [travis-image]: https://img.shields.io/travis/pvoisin/URL.js.svg?branch=master
 [travis-url]: https://travis-ci.org/pvoisin/URL.js/
-[coveralls-image]: https://coveralls.io/repos/pvoisin/URL.js/badge.svg?branch=master
-[coveralls-url]: https://coveralls.io/r/pvoisin/URL.js?branch=master
+[coveralls-image]: https://coveralls.io/repos/pvoisin/URL.js/badge.svg?branch=master&service=github
+[coveralls-url]: https://coveralls.io/github/pvoisin/URL.js?branch=master
