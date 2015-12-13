@@ -1,6 +1,6 @@
 {
   "name": "unified-resource-locator",
-  "version": "0.2.0",
+  "version": "1.1.1",
   "description": "Simple URL implementation.",
   "main": "distribution/browser/URL.js",
   "authors": [

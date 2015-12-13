@@ -11,7 +11,13 @@ function URL(locator, options, overwrite) {
 			throw new Error("Invalid locator:", locator);
 		}
 
-		options = helper.merge({/* ∅ */}, options);
+		options = helper.merge({/* default */}, options);
+
+		if(locator.indexOf("file:///") === 0) {
+			var isLocalFileURL = true;
+			// Set a fake host so that the following validation passes...
+			locator = locator.replace(/^file:\/\/\//, "file://localhost/");
+		}
 
 		var capture = URL.pattern.exec(locator);
 
@@ -20,6 +26,11 @@ function URL(locator, options, overwrite) {
 		}
 
 		capture = capture.slice(1);
+
+		if(isLocalFileURL) {
+			// We don't want the fake host we've previously set...
+			delete capture[3];
+		}
 
 		URL.parts.forEach(function(part, index) {
 			var value = overwrite && (part in options) ? options[part] : capture[index] || options[part];
@@ -43,7 +54,7 @@ function URL(locator, options, overwrite) {
 	else {
 		options = locator;
 
-		if(options.protocol && !options.host
+		if(options.protocol && !options.host && options.protocol !== "file"
 			|| options.port && !options.host
 			|| options.user && !options.host
 			|| options.password && !options.user) {
@@ -87,6 +98,9 @@ URL.prototype.toString = function() {
 		if(own.port && own.port !== 80) {
 			result += ":" + own.port;
 		}
+	}
+	else if(own.protocol === "file") {
+		result += "file://";
 	}
 
 	result += own.path;

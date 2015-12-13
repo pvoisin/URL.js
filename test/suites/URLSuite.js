@@ -15,7 +15,10 @@ describe("URL", function() {
 			{protocol: "http", "host": "server"},
 			{host: "server"},
 			{path: "/from/root"},
-			{query: "A=1"}
+			{query: "A=1"},
+			"file://host/path/to/remote/file",
+			"file:///path/to/local/file",
+			{protocol: "file", "path": "/path/to/local/file"}
 		],
 		proofs: {
 			parts: [
@@ -30,7 +33,10 @@ describe("URL", function() {
 				{protocol: "http", host: "server", path: "/"},
 				{host: "server", path: "/"},
 				{path: "/from/root"},
-				{path: "/", query: {A: 1}}
+				{path: "/", query: {A: 1}},
+				{protocol: "file", host: "host", path: "/path/to/remote/file"},
+				{protocol: "file", path: "/path/to/local/file"},
+				{protocol: "file", "path": "/path/to/local/file"}
 			],
 			representations: [
 				"http://foo.bar-baz.com/p/a/t/h?q=u&e&r=y#fragment",
@@ -44,7 +50,10 @@ describe("URL", function() {
 				"http://server/",
 				"//server/",
 				"/from/root",
-				"/?A=1"
+				"/?A=1",
+				"file://host/path/to/remote/file",
+				"file:///path/to/local/file",
+				"file:///path/to/local/file"
 			]
 		},
 		invalid: [
@@ -82,7 +91,7 @@ describe("URL", function() {
 	});
 
 	it("should be the same as what's provided to the constructor when not overridden nor completed", function() {
-		var locator = "file://localhost:1234/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1";
+		var locator = "http://localhost:1234/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1";
 		expect(String(new URL(locator))).to.be(locator);
 	});
 
@@ -100,20 +109,20 @@ describe("URL", function() {
 	});
 
 	it("could be overridden by options", function() {
-		var locator = "file://localhost:1234/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1";
+		var locator = "http://localhost:1234/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1";
 
 		expect(String(new URL(locator, {protocol: null}, true))).to.be("//localhost:1234/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
 		expect(String(new URL(locator, {host: null}, true))).to.be("/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
-		expect(String(new URL(locator, {port: null}, true))).to.be("file://localhost/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
-		expect(String(new URL(locator, {path: null}, true))).to.eql("file://localhost:1234/?X=1&Y&Z=3&odd=bizarre#items?page=1");
-		expect(String(new URL(locator, {query: null}, true))).to.be("file://localhost:1234/abc/def/ghi.xyz#items?page=1");
-		expect(String(new URL(locator, {query: {user: "Mickey"}}, true))).to.be("file://localhost:1234/abc/def/ghi.xyz?user=Mickey#items?page=1");
-		expect(String(new URL(locator, {fragment: null}, true))).to.be("file://localhost:1234/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre");
+		expect(String(new URL(locator, {port: null}, true))).to.be("http://localhost/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre#items?page=1");
+		expect(String(new URL(locator, {path: null}, true))).to.eql("http://localhost:1234/?X=1&Y&Z=3&odd=bizarre#items?page=1");
+		expect(String(new URL(locator, {query: null}, true))).to.be("http://localhost:1234/abc/def/ghi.xyz#items?page=1");
+		expect(String(new URL(locator, {query: {user: "Mickey"}}, true))).to.be("http://localhost:1234/abc/def/ghi.xyz?user=Mickey#items?page=1");
+		expect(String(new URL(locator, {fragment: null}, true))).to.be("http://localhost:1234/abc/def/ghi.xyz?X=1&Y&Z=3&odd=bizarre");
 
 		expect(String(new URL(locator, {
 			query: null,
 			fragment: null
-		}, true))).to.be("file://localhost:1234/abc/def/ghi.xyz");
+		}, true))).to.be("http://localhost:1234/abc/def/ghi.xyz");
 	});
 
 	it("should allow query manipulation", function() {
