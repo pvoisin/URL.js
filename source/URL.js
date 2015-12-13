@@ -103,7 +103,7 @@ URL.prototype.toString = function() {
 };
 
 // Cf. [RFC 3986](http://en.wikipedia.org/wiki/URI_scheme#Generic_syntax)
-URL.pattern = /^(?:(?:(\w+):)?\/\/(?:(\w+)(?::(\w+))?@)?([.\-\w]+)(?::(\d+))?)?(?:(\/[^\?#]*)(?:\?([^#]+))?(?:#(.+))?)?$/;
+URL.pattern = /^(?:(?:(\w+):)?\/\/(?:(\w+)(?::(\w+))?@)?([.\-\w]+)(?::(\d+))?)?(?:(\/(?!\/)[^\?#]*)(?:\?([^#]+))?(?:#(.+))?)?$/;
 
 URL.parts = ["protocol", "user", "password", "host", "port", "path", "query", "fragment"];
 

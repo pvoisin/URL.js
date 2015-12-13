@@ -54,6 +54,8 @@ describe("URL", function() {
 			"abc.xyz",
 			"://host:80/p/a/t/h?q=u&e&r=y#fragment",
 			"http://:port/p/a/t/h?q=u&e&r=y#fragment",
+			"file:/whatever",
+			"///what",
 			{protocol: "http"},
 			{user: "whoever"},
 			{password: "***"},
